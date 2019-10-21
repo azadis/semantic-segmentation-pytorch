@@ -4,6 +4,7 @@ import torch
 from torchvision import transforms
 import numpy as np
 from PIL import Image
+import PIL
 
 
 def imresize(im, size, interp='bilinear'):
@@ -156,9 +157,12 @@ class TrainDataset(BaseDataset):
             # load image and label
             image_path = os.path.join(self.root_dataset, this_record['fpath_img'])
             segm_path = os.path.join(self.root_dataset, this_record['fpath_segm'])
+            # print(image_path, segm_path)
 
             img = Image.open(image_path).convert('RGB')
             segm = Image.open(segm_path)
+            if img.size[0] != segm.size[0] or img.size[1] != segm.size[1]:
+                segm = segm.resize((img.size[0], img.size[1]), resample=PIL.Image.NEAREST)
             assert(segm.mode == "L")
             assert(img.size[0] == segm.size[0])
             assert(img.size[1] == segm.size[1])
