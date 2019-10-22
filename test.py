@@ -18,16 +18,16 @@ from PIL import Image
 from tqdm import tqdm
 from config import cfg
 
-colors = loadmat('data/color150.mat')['colors']
-names = {}
-with open('data/object150_info.csv') as f:
-    reader = csv.reader(f)
-    next(reader)
-    for row in reader:
-        names[int(row[0])] = row[5].split(";")[0]
+# colors = loadmat(args.DATASET.colormat)['colors']
+# names = {}
+# with open('data/object150_info.csv') as f:
+#     reader = csv.reader(f)
+#     next(reader)
+#     for row in reader:
+#         names[int(row[0])] = row[5].split(";")[0]
 
 
-def visualize_result(data, pred, cfg):
+def visualize_result(data, pred, cfg, names, colors):
     (img, info) = data
 
     # print predictions in descending order
@@ -52,7 +52,7 @@ def visualize_result(data, pred, cfg):
         os.path.join(cfg.TEST.result, img_name.replace('.jpg', '.png')))
 
 
-def test(segmentation_module, loader, gpu):
+def test(segmentation_module, loader, gpu, names, colors):
     segmentation_module.eval()
 
     pbar = tqdm(total=len(loader))
@@ -85,8 +85,12 @@ def test(segmentation_module, loader, gpu):
         visualize_result(
             (batch_data['img_ori'], batch_data['info']),
             pred,
-            cfg
+            cfg, names, colors
         )
+        del feed_dict
+        del scores
+        del pred_tmp
+        del pred
 
         pbar.update(1)
 
@@ -123,9 +127,17 @@ def main(cfg, gpu):
         drop_last=True)
 
     segmentation_module.cuda()
+    colors = loadmat(cfg.DATASET.color_mat)['colors']
+    names = {}
+    with open(cfg.DATASET.object_info) as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            print(row)
+            names[int(row[0])] = row[5].split(";")[0]
 
     # Main loop
-    test(segmentation_module, loader_test, gpu)
+    test(segmentation_module, loader_test, gpu, names, colors)
 
     print('Inference done!')
 
@@ -185,8 +197,8 @@ if __name__ == '__main__':
         os.path.exists(cfg.MODEL.weights_decoder), "checkpoint does not exitst!"
 
     # generate testing image list
-    if os.path.isdir(args.imgs[0]):
-        imgs = find_recursive(args.imgs[0])
+    if os.path.isdir(args.imgs):
+        imgs = find_recursive(args.imgs)
     else:
         imgs = [args.imgs]
     assert len(imgs), "imgs should be a path to image (.jpg) or directory."
@@ -195,4 +207,5 @@ if __name__ == '__main__':
     if not os.path.isdir(cfg.TEST.result):
         os.makedirs(cfg.TEST.result)
 
+    
     main(cfg, args.gpu)

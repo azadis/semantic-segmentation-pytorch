@@ -2,6 +2,8 @@ DATASET:
   root_dataset: "./data/"
   list_train: "./data/training_bedroom.odgt"
   list_val: "./data/validation_bedroom.odgt"
+  color_mat: "./data/color_bedroom.mat"
+  object_info: "./data/objectInfo_ADE_bedroom.csv"
   num_class: 66
   imgSizes: (300, 375, 450, 525, 600)
   imgMaxSize: 1000
@@ -32,11 +34,11 @@ TRAIN:
   seed: 304
 
 VAL:
-  visualize: False
-  checkpoint: "epoch_120.pth"
+  visualize: True
+  checkpoint: "epoch_18.pth"
 
 TEST:
-  checkpoint: "epoch_120.pth"
-  result: "./"
+  checkpoint: "epoch_18.pth"
+  result: "/shared/sazadi/data1/semantic-segmentation-pytorch/output"
 
-DIR: "/mnt/disks/sazadi/semantic-segmentation-pytorch/ckpt/ade_bedroom-hrnetv2-c1"
+DIR: "/shared/sazadi/data1/semantic-segmentation-pytorch/ckpt/ade_bedroom-hrnetv2-c1"
